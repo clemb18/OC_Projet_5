@@ -1,5 +1,5 @@
 import pandas as pd
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 
 def clean_data(file_path):
     """Charge et nettoie les données du CSV."""
@@ -45,7 +45,22 @@ def insert_to_mongodb(df, db_name="medical_db", collection_name="patients"):
         result = collection.insert_many(documents)
         
         print(f"Migration réussie ! {len(result.inserted_ids)} documents insérés dans la base '{db_name}'.")
+
+        # --- CREATION DES INDEX ---
+        print("Création des index d'optimisation...")
         
+        # Index 1 : Nom de patients
+        collection.create_index([("Name", ASCENDING)])
+        
+        # Index 2 : Maladie
+        collection.create_index([("Medical Condition", ASCENDING)])
+        
+        # Index 3 : Date d'admission
+        collection.create_index([("Date of Admission", ASCENDING)])
+
+        print("Index créés avec succès")
+        # --------------------------
+
     except Exception as e:
         print(f"Erreur lors de la connexion ou de l'insertion : {e}")
     finally:
