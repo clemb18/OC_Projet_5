@@ -20,3 +20,8 @@ Pour répondre aux exigences de performance, trois index spécifiques ont été 
 Pour sécuriser l'accès aux données médicales, deux utilisateurs sont créés directement via le script de migration :
 - **`admin_medical` (Rôle : dbOwner)** : Utilisateur administrateur possédant tous les droits sur la base `medical_db` (lecture, écriture, gestion des index et des collections).
 - **`lecture_medical` (Rôle : read)** : Utilisateur restreint à la consultation des données de `medical_db`.
+
+## Tests d'Intégrité et Opérations CRUD
+Un script dédié (`test_crud.py`) permet de garantir la fiabilité de la base de données :
+- **Intégrité volumétrique** : Comparaison automatisée du nombre d'enregistrements entre le fichier CSV source nettoyé et la collection MongoDB.
+- **Manipulation CRUD** : Démonstration automatisée des requêtes de base (Création, Lecture, Mise à jour, Suppression) via `pymongo` pour valider l'opérabilité de la base.
