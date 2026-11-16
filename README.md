@@ -10,6 +10,12 @@ Avant l'insertion dans MongoDB, les données brutes ont été nettoyées à l'ai
 - **Typage temporel** : Conversion des dates d'admission et de sortie au format `datetime` pour permettre les requêtes dans MongoDB.
 - **Formatage financier** : Arrondi des montants de facturation à deux décimales.
 
+## Optimisation et Indexation
+Pour répondre aux exigences de performance, trois index spécifiques ont été créés automatiquement lors de la migration :
+- **`Name` (Ascendant)** : Accélère les recherches nominatives directes.
+- **`Medical Condition` (Ascendant)** : Optimise le filtrage par type de pathologie.
+- **`Date of Admission` (Ascendant)** : Facilite les requêtes chronologiques.
+
 ## Sécurité et Rôles Utilisateurs
 Pour sécuriser l'accès aux données médicales, deux utilisateurs sont créés directement via le script de migration :
 - **`admin_medical` (Rôle : dbOwner)** : Utilisateur administrateur possédant tous les droits sur la base `medical_db` (lecture, écriture, gestion des index et des collections).
