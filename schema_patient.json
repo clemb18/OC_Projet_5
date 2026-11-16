@@ -1,0 +1,18 @@
+{
+  "_id": "ObjectId (Généré automatiquement par MongoDB)",
+  "Name": "String",
+  "Age": "Integer",
+  "Gender": "String",
+  "Blood Type": "String",
+  "Medical Condition": "String",
+  "Date of Admission": "ISODate (Format YYYY-MM-DD)",
+  "Doctor": "String",
+  "Hospital": "String",
+  "Insurance Provider": "String",
+  "Billing Amount": "Double (Arrondi à 2 décimales)",
+  "Room Number": "Integer",
+  "Admission Type": "String",
+  "Discharge Date": "ISODate (Format YYYY-MM-DD)",
+  "Medication": "String",
+  "Test Results": "String"
+}
