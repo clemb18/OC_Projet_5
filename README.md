@@ -42,19 +42,19 @@ Le conteneur Python utilise un pont vers votre ordinateur pour lire les données
 1. Assurez-vous que le port local `27017` est libre (aucun MongoDB local en cours d'exécution).
 2. Lancez l'infrastructure complète (construction des images, création des volumes, et exécution de la migration) en arrière-plan :
 
-**docker compose up --build -d**
+**`docker compose up --build -d`**
 
 3. Pour voir les logs du script de migration et confirmer le succès :
 
-**docker compose logs -f migration_app**
+**`docker compose logs -f migration_app`**
 
 4. Pour éteindre le serveur MongoDB et nettoyer l'environnement une fois terminé :
 
-**docker compose down**
+**`docker compose down`**
 
 ### Lancement des tests automatisés
 Un script dédié (`test_crud.py`) permet de garantir l'intégrité volumétrique (comparaison CSV/MongoDB) et de valider les opérations CRUD (Create, Read, Update, Delete).
 
 Une fois l'infrastructure lancée (MongoDB en cours de fonctionnement), exécutez ce script de test de manière isolée dans le conteneur avec la commande suivante :
 
-**docker compose run --rm migration_app python test_crud.py**
+**`docker compose run --rm migration_app python test_crud.py`**
