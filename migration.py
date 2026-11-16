@@ -1,5 +1,14 @@
+import os
+from dotenv import load_dotenv
 import pandas as pd
 from pymongo import MongoClient, ASCENDING
+
+# Charge les variables depuis le fichier .env
+load_dotenv()
+
+# Récupération sécurisée des mots de passe
+admin_password = os.getenv("MONGO_ADMIN_PASS")
+read_password = os.getenv("MONGO_READ_PASS")
 
 def clean_data(file_path):
     """Charge et nettoie les données du CSV."""
@@ -68,7 +77,7 @@ def insert_to_mongodb(df, db_name="medical_db", collection_name="patients"):
         try:
             db.command(
                 "createUser", "admin_medical",
-                pwd="AdminPassword123!",
+                pwd=admin_password,
                 roles=[{"role": "dbOwner", "db": "medical_db"}]
             )
             print("Utilisateur 'admin_medical' créé.")
@@ -79,7 +88,7 @@ def insert_to_mongodb(df, db_name="medical_db", collection_name="patients"):
         try:
             db.command(
                 "createUser", "lecture_medical",
-                pwd="ReadPassword123!",
+                pwd=read_password,
                 roles=[{"role": "read", "db": "medical_db"}]
             )
             print("Utilisateur 'lecture_medical' créé.")

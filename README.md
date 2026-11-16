@@ -61,3 +61,12 @@ Un script dédié (`test_crud.py`) permet de garantir l'intégrité volumétriqu
 Une fois l'infrastructure lancée (MongoDB en cours de fonctionnement), exécutez ce script de test de manière isolée dans le conteneur avec la commande suivante :
 
 **`docker compose run --rm migration_app python test_crud.py`**
+
+#### Gestion des mots de passe (Variables d'environnement)
+Afin de prévenir toute fuite d'informations sensibles sur ce dépôt public, les mots de passe de la base de données ne sont pas écrits en clair dans le script Python. Le projet utilise la bibliothèque `python-dotenv` pour charger ces secrets depuis l'extérieur du code.
+
+**Pour exécuter ce projet localement :**
+Vous devez créer un fichier nommé `.env` à la racine du projet (au même niveau que le `docker-compose.yml`) et y renseigner vos propres mots de passe :
+
+`MONGO_ADMIN_PASS=votre_mot_de_passe_admin`
+`MONGO_READ_PASS=votre_mot_de_passe_lecture`
