@@ -11,7 +11,7 @@ def run_automated_tests(csv_path):
     print(f"[Test Avant Migration] Le fichier source contient {expected_count} lignes uniques.")
     
     # 2. État APRÈS migration (Interrogation de MongoDB)
-    client = MongoClient('mongodb://host.docker.internal:27017/')
+    client = MongoClient('mongodb://mongodb:27017/')
     collection = client['medical_db']['patients']
     
     actual_count = collection.count_documents({})
@@ -26,7 +26,7 @@ def run_automated_tests(csv_path):
 
 def demonstrate_crud():
     print("\n--- 2. MANIPULATION CRUD SUR MONGODB ---")
-    client = MongoClient('mongodb://host.docker.internal:27017/')
+    client = MongoClient('mongodb://mongodb:27017/')
     collection = client['medical_db']['patients']
     
     # CREATE (Créer un document spécifique)

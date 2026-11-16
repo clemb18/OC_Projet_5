@@ -27,7 +27,7 @@ def insert_to_mongodb(df, db_name="medical_db", collection_name="patients"):
     print("Connexion à MongoDB")
     try:
         # 1. Connexion au serveur local
-        client = MongoClient('mongodb://host.docker.internal:27017/')
+        client = MongoClient('mongodb://mongodb:27017/')
         
         # 2. Sélection de la base et de la collection
         db = client[db_name]
