@@ -26,6 +26,9 @@ Un script dédié (`test_crud.py`) permet de garantir la fiabilité de la base d
 - **Intégrité volumétrique** : Comparaison automatisée du nombre d'enregistrements entre le fichier CSV source nettoyé et la collection MongoDB.
 - **Manipulation CRUD** : Démonstration automatisée des requêtes de base (Création, Lecture, Mise à jour, Suppression) via `pymongo` pour valider l'opérabilité de la base.
 
+### Modèle de Données (Schéma MongoDB)
+Étant donné que MongoDB est une base de données NoSQL orientée documents, le schéma est intrinsèquement flexible (Schema-less). La structure typique et le typage d'un dossier patient post-nettoyage sont documentés dans le fichier [`schema_patient.json`](./schema_patient.json).
+
 ## Étape 2 : Docker Compose
 L'environnement de production est entièrement conteneurisé via `docker-compose.yml`, garantissant une reproductibilité totale.
 
