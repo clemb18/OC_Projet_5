@@ -9,3 +9,8 @@ Avant l'insertion dans MongoDB, les données brutes ont été nettoyées à l'ai
 - **Standardisation** : Application d'une casse harmonisée (Title Case) sur les noms des patients.
 - **Typage temporel** : Conversion des dates d'admission et de sortie au format `datetime` pour permettre les requêtes dans MongoDB.
 - **Formatage financier** : Arrondi des montants de facturation à deux décimales.
+
+## Sécurité et Rôles Utilisateurs
+Pour sécuriser l'accès aux données médicales, deux utilisateurs sont créés directement via le script de migration :
+- **`admin_medical` (Rôle : dbOwner)** : Utilisateur administrateur possédant tous les droits sur la base `medical_db` (lecture, écriture, gestion des index et des collections).
+- **`lecture_medical` (Rôle : read)** : Utilisateur restreint à la consultation des données de `medical_db`.

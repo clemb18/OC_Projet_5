@@ -61,6 +61,32 @@ def insert_to_mongodb(df, db_name="medical_db", collection_name="patients"):
         print("Index créés avec succès")
         # --------------------------
 
+        # --- SÉCURITÉ ET UTILISATEURS ---
+        print("Configuration de la sécurité")
+        
+        # 1. Utilisateur Administrateur
+        try:
+            db.command(
+                "createUser", "admin_medical",
+                pwd="AdminPassword123!",
+                roles=[{"role": "dbOwner", "db": "medical_db"}]
+            )
+            print("Utilisateur 'admin_medical' créé.")
+        except Exception as e:
+            print("Note : 'admin_medical' existe déjà ou n'a pas pu être créé.")
+
+        # 2. Utilisateur Read-Only
+        try:
+            db.command(
+                "createUser", "lecture_medical",
+                pwd="ReadPassword123!",
+                roles=[{"role": "read", "db": "medical_db"}]
+            )
+            print("Utilisateur 'lecture_medical' créé.")
+        except Exception as e:
+            print("Note : 'lecture_medical' existe déjà ou n'a pas pu être créé.")
+        # --------------------------------
+
     except Exception as e:
         print(f"Erreur lors de la connexion ou de l'insertion : {e}")
     finally:
