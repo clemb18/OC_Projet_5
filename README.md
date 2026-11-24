@@ -16,6 +16,9 @@ Pour répondre aux exigences de performance, trois index spécifiques ont été 
 - **`Medical Condition` (Ascendant)** : Optimise le filtrage par type de pathologie.
 - **`Date of Admission` (Ascendant)** : Facilite les requêtes chronologiques.
 
+## Modèle de Données (Schéma MongoDB)
+Étant donné que MongoDB est une base de données NoSQL orientée documents, le schéma est intrinsèquement flexible (Schema-less). La structure typique et le typage d'un dossier patient post-nettoyage sont documentés dans le fichier [`schema_patient.json`](./schema_patient.json).
+
 ## Sécurité, Authentification et Rôles Utilisateurs
 L'authentification MongoDB est activée dès l'initialisation du serveur via les variables d'environnement `MONGO_INITDB_ROOT_USERNAME` et `MONGO_INITDB_ROOT_PASSWORD`. 
 Le script de migration (`migration.py`) s'authentifie avec ce compte `root` (`authSource=admin`) pour insérer les données et créer deux utilisateurs applicatifs sur la base `medical_db` selon le principe du moindre privilège :
