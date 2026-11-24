@@ -7,6 +7,8 @@ from pymongo import MongoClient, ASCENDING
 load_dotenv()
 
 # Récupération sécurisée des mots de passe
+root_user = os.getenv("MONGO_ROOT_USER")
+root_pass = os.getenv("MONGO_ROOT_PASS")
 admin_password = os.getenv("MONGO_ADMIN_PASS")
 read_password = os.getenv("MONGO_READ_PASS")
 
@@ -35,8 +37,9 @@ def insert_to_mongodb(df, db_name="medical_db", collection_name="patients"):
     """Insère le DataFrame nettoyé dans MongoDB."""
     print("Connexion à MongoDB")
     try:
-        # 1. Connexion au serveur local
-        client = MongoClient('mongodb://mongodb:27017/')
+        # 1. Connexion authentifiée au serveur MongoDB
+        mongo_uri = f"mongodb://{root_user}:{root_pass}@mongodb:27017/?authSource=admin"
+        client = MongoClient(mongo_uri)
         
         # 2. Sélection de la base et de la collection
         db = client[db_name]

@@ -16,57 +16,60 @@ Pour répondre aux exigences de performance, trois index spécifiques ont été 
 - **`Medical Condition` (Ascendant)** : Optimise le filtrage par type de pathologie.
 - **`Date of Admission` (Ascendant)** : Facilite les requêtes chronologiques.
 
-## Sécurité et Rôles Utilisateurs
-Pour sécuriser l'accès aux données médicales, deux utilisateurs sont créés directement via le script de migration :
-- **`admin_medical` (Rôle : dbOwner)** : Utilisateur administrateur possédant tous les droits sur la base `medical_db` (lecture, écriture, gestion des index et des collections).
-- **`lecture_medical` (Rôle : read)** : Utilisateur restreint à la consultation des données de `medical_db`.
+## Sécurité, Authentification et Rôles Utilisateurs
+L'authentification MongoDB est activée dès l'initialisation du serveur via les variables d'environnement `MONGO_INITDB_ROOT_USERNAME` et `MONGO_INITDB_ROOT_PASSWORD`. 
+Le script de migration (`migration.py`) s'authentifie avec ce compte `root` (`authSource=admin`) pour insérer les données et créer deux utilisateurs applicatifs sur la base `medical_db` selon le principe du moindre privilège :
+- **`admin_medical` (Rôle : `dbOwner`)** : Utilisateur administrateur possédant tous les droits sur `medical_db` (lecture, écriture, gestion des index et des collections).
+- **`lecture_medical` (Rôle : `read`)** : Utilisateur strictement restreint à la consultation des données de `medical_db`.
 
-## Tests d'Intégrité et Opérations CRUD
-Un script dédié (`test_crud.py`) permet de garantir la fiabilité de la base de données :
-- **Intégrité volumétrique** : Comparaison automatisée du nombre d'enregistrements entre le fichier CSV source nettoyé et la collection MongoDB.
-- **Manipulation CRUD** : Démonstration automatisée des requêtes de base (Création, Lecture, Mise à jour, Suppression) via `pymongo` pour valider l'opérabilité de la base.
+### Gestion des Secrets (`.env`)
+Afin de prévenir toute fuite d'informations sensibles sur ce dépôt public, aucun identifiant n'est écrit en clair dans le code. Le projet utilise `python-dotenv` pour charger les secrets depuis un fichier `.env` local (strictement ignoré par Git via `.gitignore`).
 
-### Modèle de Données (Schéma MongoDB)
-Étant donné que MongoDB est une base de données NoSQL orientée documents, le schéma est intrinsèquement flexible (Schema-less). La structure typique et le typage d'un dossier patient post-nettoyage sont documentés dans le fichier [`schema_patient.json`](./schema_patient.json).
+**Configuration requise avant lancement :**
+Créez un fichier `.env` à la racine du projet (au même niveau que `docker-compose.yml`) avec les variables suivantes :
 
-## Étape 2 : Docker Compose
-L'environnement de production est entièrement conteneurisé via `docker-compose.yml`, garantissant une reproductibilité totale.
+```env
+MONGO_ROOT_USER=root_admin
+MONGO_ROOT_PASS=votre_mot_de_passe_root
+MONGO_ADMIN_PASS=votre_mot_de_passe_admin
+MONGO_READ_PASS=votre_mot_de_passe_lecture
+```
 
-### Architecture
-L'application repose sur deux services interconnectés dans un réseau privé :
-- **Service `mongodb`** : Héberge le serveur de base de données. Il utilise un volume persistant (`db_data`) pour éviter la perte des données.
-- **Service `migration_app`** : Exécute le script Python de nettoyage et d'insertion de manière éphémère.
+## Architecture Docker Compose
+L'environnement est orchestré via `docker-compose.yml`, garantissant une reproductibilité et une isolation complètes:
+- **Réseau isolé (`medical_network`)** : Réseau privé de type `bridge` permettant la communication interne sécurisée entre les conteneurs.
+- **Service `mongodb` (`mongodb_conteneur`)** : Héberge le serveur MongoDB avec authentification activée, persistance des données via le volume `db_data`, et un **`healthcheck`** (`mongosh --eval "db.adminCommand('ping')"`) vérifiant la disponibilité réelle de la base.
+- **Service `migration_app` (`python_migration`)** : Attend que MongoDB atteigne l'état `service_healthy` avant d'exécuter le script Python de nettoyage, d'insertion et de création des utilisateurs.
 
 ### Préparation des données (Fichier CSV)
-Le conteneur Python utilise un pont vers votre ordinateur pour lire les données. 
-**Placez simplement votre fichier source `healthcare_dataset.csv` à la racine du projet** (au même niveau que le fichier `docker-compose.yml`). Le script le lira automatiquement lors de son exécution sans avoir besoin de recompiler l'image Docker.
+Le conteneur Python utilise un volume monté vers votre répertoire local pour lire les données sources.
+**Placez simplement le fichier `healthcare_dataset.csv` à la racine du projet** (au même niveau que `docker-compose.yml`).
 
 ### Commandes d'exécution
-1. Assurez-vous que le port local `27017` est libre (aucun MongoDB local en cours d'exécution).
-2. Lancez l'infrastructure complète (construction des images, création des volumes, et exécution de la migration) en arrière-plan :
+1. Assurez-vous que le port local `27017` est libre.
+2. Lancez l'infrastructure complète en arrière-plan :
+   ```
+   docker compose up --build -d
+   ```
+3. Vérifiez l'état de santé (`healthy`) du conteneur MongoDB et les logs de migration :
+   ```
+   docker compose ps
+   docker compose logs migration_app
+   ```
+4. Pour arrêter les conteneurs :
+   ```
+   docker compose down
+   ```
+   *(Pour repartir d'une base vierge et réinitialiser les utilisateurs, ajoutez l'option `-v` : `docker compose down -v`)*
 
-**`docker compose up --build -d`**
+## Tests d'Intégrité, Opérations CRUD et Sécurité
+Un script automatisé (`test_crud.py`) valide l'ensemble de l'architecture en utilisant des connexions authentifiées (`authSource=medical_db`):
+1. **Intégrité volumétrique** : Vérifie que le nombre de documents insérés dans MongoDB correspond exactement au nombre de lignes uniques du fichier CSV source.
+2. **Manipulation CRUD (`admin_medical`)** : Valide les opérations complètes de Création (`insert_one`), Lecture (`find_one`), Mise à jour (`update_one`) et Suppression (`delete_one`).
+3. **Validation du moindre privilège (`lecture_medical`)** : Confirme que la lecture est autorisée mais que toute tentative d'insertion, de modification ou de suppression est immédiatement rejetée par MongoDB (`OperationFailure`).
 
-3. Pour voir les logs du script de migration et confirmer le succès :
+Une fois l'infrastructure démarrée, exécutez la suite de tests dans le réseau Docker avec la commande :
 
-**`docker compose logs -f migration_app`**
-
-4. Pour éteindre le serveur MongoDB et nettoyer l'environnement une fois terminé :
-
-**`docker compose down`**
-
-### Lancement des tests automatisés
-Un script dédié (`test_crud.py`) permet de garantir l'intégrité volumétrique (comparaison CSV/MongoDB) et de valider les opérations CRUD (Create, Read, Update, Delete).
-
-Une fois l'infrastructure lancée (MongoDB en cours de fonctionnement), exécutez ce script de test de manière isolée dans le conteneur avec la commande suivante :
-
-**`docker compose run --rm migration_app python test_crud.py`**
-
-#### Gestion des mots de passe (Variables d'environnement)
-Afin de prévenir toute fuite d'informations sensibles sur ce dépôt public, les mots de passe de la base de données ne sont pas écrits en clair dans le script Python. Le projet utilise la bibliothèque `python-dotenv` pour charger ces secrets depuis l'extérieur du code.
-
-**Pour exécuter ce projet localement :**
-Vous devez créer un fichier nommé `.env` à la racine du projet (au même niveau que le `docker-compose.yml`) et y renseigner vos propres mots de passe :
-
-`MONGO_ADMIN_PASS=votre_mot_de_passe_admin`
-`MONGO_READ_PASS=votre_mot_de_passe_lecture`
+```
+docker compose run --rm migration_app python test_crud.py
+```

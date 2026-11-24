@@ -1,23 +1,39 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:latest
     container_name: mongodb_conteneur
     ports:
-      - "27017:27017" # Expose le port pour l'inspecter avec Compass
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
     volumes:
-      - db_data:/data/db # VOLUME 1 : Base de données
+      - db_data:/data/db
+    networks:
+      - medical_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   migration_app:
     build: .
     container_name: python_migration
     depends_on:
-      - mongodb
-    env_file:          
-      - .env  # pour acceder aux mdp
+      mongodb:
+        condition: service_healthy
+    env_file:
+      - .env
     volumes:
-      - ./:/app # VOLUME 2 : Dossier local vers le conteneur
+      - ./:/app
+    networks:
+      - medical_network
 
 volumes:
-  db_data: # Déclaration du volume persistant
+  db_data:
+
+networks:
+  medical_network:
+    driver: bridge
